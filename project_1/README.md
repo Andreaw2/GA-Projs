@@ -59,185 +59,6 @@ https://www.collegeraptor.com/getting-in/articles/act-sat/states-act-sat-given-f
 
 ---
 
-### Data Import and Cleaning 
-
-sat_2017 = pd.read_csv('../data/sat_2017.csv')
-sat_2018 = pd.read_csv('../data/sat_2018.csv')
-sat_2019 = pd.read_csv('../data/sat_2019.csv')
-
-### 1. Display the data. Print first 5 rows of each dataframe
-
-sat_2017.head()
-
-sat_2018.head()
-
-sat_2019.head()
-
-### 2. Check for missing values
-
-sat_2017.isnull().sum()
-
-sat_2018.isnull().sum()
-
-sat_2019.isnull().sum()
-
-There are no missing values for the sat 2017-2019 data. 
-
-### 3. Check for any obvious issues
-
-sat_2017.shape
-
-sat_2018.shape
-
-sat_2019.shape
-
-sat_2017[sat_2017['State'].duplicated()]
-
-sat_2018[sat_2018['State'].duplicated()]
-
-sat_2019[sat_2019['State'].duplicated()]
-
-min_ebrw_sat_2017 = sat_2017['Evidence-Based Reading and Writing'].min()
-min_math_sat_2017 = sat_2017['Math'].min()
-
-print(f'The minumum scores for the 2017 SAT were: English: {min_ebrw_sat_2017}; Math: {min_math_sat_2017}')
-
-min_ebrw_sat_2018 = sat_2018['Evidence-Based Reading and Writing'].min()
-min_math_sat_2018 = sat_2018['Math'].min()
-
-print(f'The minumum scores for the 2018 SAT were: English: {min_ebrw_sat_2018}; Math: {min_math_sat_2018}')
-
-
-min_ebrw_sat_2019 = sat_2019['EBRW'].min()
-min_math_sat_2019 = sat_2019['Math'].min()
-
-print(f'The minimum scores for the 2019 SAT were: English: {min_ebrw_sat_2019}; Math: {min_math_sat_2019}')
-
-The minimum score for 2017 SAT Math is 52, which is too low. More indepth look at the data is required. 
-
-max_ebrw_sat_2017 = sat_2017['Evidence-Based Reading and Writing'].max()
-max_math_sat_2017 = sat_2017['Math'].max()
-
-print(f'The maximum scores for the 2017 SAT were: English: {max_ebrw_sat_2017}; Math: {max_math_sat_2017}')
-
-max_ebrw_sat_2018 = sat_2018['Evidence-Based Reading and Writing'].max()
-max_math_sat_2018 = sat_2018['Math'].max()
-
-print(f'The maximum scores for the 2018 SAT were: English: {max_ebrw_sat_2018}; Math: {max_math_sat_2018}')
-
-
-max_ebrw_sat_2019 = sat_2019['EBRW'].max()
-max_math_sat_2019 = sat_2019['Math'].max()
-
-print(f'The maximum scores for the 2019 SAT were: English: {max_ebrw_sat_2019}; Math: {max_math_sat_2019}')
-
-sat_2019['Participation Rate']
-
-There are two inputs in 2019 sat data with '-' in them. They will need to be removed and replaced with an appropriate value. 
-
-### 4. Fix errors identified in 2. and 3. 
-
-
-sat_2017.loc[sat_2017['Math'] == 52]
-
-#1060 - 536 = 524
-sat_2017.loc[sat_2017['Math'] == 52, 'Math'] = 524
-
-sat_2019.loc[sat_2019['Participation Rate'] == '—' ]
-
-
-sat_2019.loc[sat_2019['Participation Rate'] == '—', 'Participation Rate' ] = '0%'
-
-It is noted that the participation rate for Puerto Rico and Virgin Islands were '-'. The values have been replaced with 0%. 
-
-### 5. Display datatypes
-
-sat_2017.dtypes
-
-sat_2018.dtypes
-
-sat_2019.dtypes
-
-The participation rates for the sat data for 2017, 2018 and 2019 will have to be converted from a string to a float.
-
-
-### 6. Fix datatypes
-
-#participation rate is an object instead of an int. Convert % 
-
-sat_2017['Participation'] = sat_2017['Participation'].map(lambda x: float(x.replace('%','')) / 100)
-
-sat_2017.head()
-
-sat_2018['Participation'] = sat_2018['Participation'].map(lambda x: float(x.replace('%','')) / 100)
-
-sat_2018.head()
-
-sat_2019['Participation Rate'] = sat_2019['Participation Rate'].map(lambda x: float(x.replace('%','')) / 100)
-
-sat_2019.head()
-
-### 7. Rename Columns
-
-sat_2017.columns
-
-#rename columns for 2017 
-sat_2017.rename(columns={'State': 'State', 'Participation': '2017_Participation', 
-                        'Evidence-Based Reading and Writing': '2017_EBRW', 
-                         'Math': '2017_Math', 'Total': '2017_Total'}, inplace=True)
-
-sat_2017.head()
-
-sat_2018.rename(columns={'State': 'State', 'Participation': '2018_Participation', 
-                        'Evidence-Based Reading and Writing': '2018_EBRW', 
-                         'Math': '2018_Math', 'Total': '2018_Total'}, inplace=True)
-
-sat_2018.head()
-
-sat_2019.rename(columns={'State': 'State', 'Participation Rate': '2019_Participation', 
-                        'EBRW': '2019_EBRW', 
-                         'Math': '2019_Math', 'Total': '2019_Total'}, inplace=True)
-
-sat_2019.head()
-
-sat_2017.shape
-
-sat_2018.shape
-
-sat_2019.shape
-
-### 8. Drop unnecessary rows
-
-
-Removing virgin islands and puerto rico from sat 2019. The participation rate is not available but there is data for 2019 sat scores. 
-
-sat_2019.drop(sat_2019[(sat_2019["State"] == 'Puerto Rico')].index, inplace = True)
-
-sat_2019.drop(sat_2019[(sat_2019["State"] == 'Virgin Islands')].index, inplace = True)
-
-sat_2019.shape
-
-### 9. Merge
-
-sat_merge = pd.merge(sat_2017, sat_2018, on='State')
-
-sat_merge.head()
-
-sat_data = pd.merge(sat_merge, sat_2019, on='State')
-
-sat_data.head()
-
-### 10. Additional cleaning as required
-
-#set index to start at 1 instead of 0
-sat_data.index +=1
-sat_data.head()
-
-### 11. Save merged dataframes as csv
-
-sat_data.to_csv('sat_data_threeyears.csv')
-
-
 ### Data Dictionary
 
 
@@ -257,3 +78,41 @@ sat_data.to_csv('sat_data_threeyears.csv')
 |**2019_Math**|*integer*|SAT 2019|Average score for the Math section of the SAT exam in 2019|
 |**2019_Total**|*integer*|SAT 2019|Average total score for both sections of the SAT exam in 2019|
 
+---
+
+## Conclusions and Recommendations
+
+The key takeaways from the data for the SAT from 2017 - 2019 are: 
+
+1) Strong negative correlation between the participation rate and the overall average SAT scores. states that had low participation rate and high scores had students that are well-prepared for the SAT. While states with high participation rates have more students than ever took the exam, many of them from low-income families or from families with no history of college attendance. Those students typically do not score as well on the exam as teenagers from wealthier families and with parents who are college graduates. Despite relatively high variance on the SAT among states below 40% participation, a linear relationship can still be intepreted between participation and state average.
+
+2) More states are seeing 100% SAT participations from 4 states in 2017 to 5 states in 2018 and 8 states in 2019. 
+
+2017 - Connecticut, Delaware, District of Columbia and Michigan
+
+2018 - Connecticut, Delaware, Colorado, Idaho and Michigan 
+
+2019 - Colorado, Connecticut, Delaware, Florida, Idaho, Illinois, Michigan and Rhode island 
+
+We are able to see an increasing trend in states taking the SAT test as more states are making this tests mandatory, resulting in 100% participation rates in the SAT tests. Certain states are also offering SAT for free for all juniors. e.g. Illinois, Idaho, Michigan, Connecticut, Colorado (for jumiors only),Delaware, District of Columbia (Juniors & Seniors), Rhode Island (Juniors). There is greater accessibility to SAT tests for students in these states.
+
+Source: https://www.collegeraptor.com/getting-in/articles/act-sat/states-act-sat-given-free/
+
+
+3) SAT Participation rates have been growing consistently from 2017 - 2019. Through the boxplot, we are able to notice that the  median for the participation has increased gradually from 2017 - 2019.There are also positive correlations in the participation rates from 2017 -2019 with more than 0.8.
+
+
+
+Recommendations in improving the SAT participation rates would include the following:
+
+1) The College Board can increase efforts in working with states, collaborating with states to increase participation rates. Work with states to require SAT in their education system. In supporting this decision, the college board will have to work with educators to ensure that the SAT is fair in measuring a high school student's readiness for college. 
+
+2) The College Board can also offer subsidies for taking the SAT tests to support students with financial difficulties, increasing accessibility for students to take the test while removing the financial burden for these students.
+
+3) Implementing online testing will ensure that SAT is more widely available internationally and also to reduce the risk during the covid pandemic. 
+
+4) States with less than 50% participation rate and average test scores lower than 25% quartile will require more support (Oklahoma, West Virginia, Utah). The college board will be able to step in and offer these states support by collaborating with the Board of Education to improve participation rates as well as test scores. This is inline with the College Board's mission to connect students to college success and opportunity. Additionally, the college board is also able to offer subsidies for students who are unable to participate in the tests due to financial concerns. The college board can offer more resources for higher education, test taking and teaching materials to encourage students to take on the SAT tests, increasing participation rate for these states. 
+
+Oklahoma has appeared on the lists for both 2017 and 2019. Participation rate has increased gradually from 7% to 22% from 2017 - 2019. More attention is required from the college board to help support the education system at Oklahoma.Support is required at Utah as participation rate has remained relatively the same from 2017-2019 at 3-4%. The college board will need to partner with the states to help increase SAT participation rates, collaborating with the state to increase access to the SAT test. The college board can offer subsidies for students who are unable to participate in the tests due to financial concerns and work with the state on making the SAT test mandatory. 
+
+West Virginia on the other hand has 99% participation rate in 2019 as all juniors must take the SAT unless taking the West Virginia Alternative Summer Assessment. However the sat scores for the state was below the 25% quartile for 2018 and 2019. The college board will be able to partner with the state to offer materials to help polish the student's test taking skills. 
